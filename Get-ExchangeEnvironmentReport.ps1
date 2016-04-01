@@ -1030,34 +1030,69 @@ for ($i=0; $i -lt $Databases.Count; $i++)
 # 4 Write Information
 _UpProg1 5 "Writing HTML Report Header" 4
 # Header
-$Output="<html>
-<body>
-<font size=""1"" face=""Segoe UI,Arial,sans-serif"">
-<h2 align=""center"">Exchange Environment Report</h3>
-<h4 align=""center"">Generated $((Get-Date).ToString())</h5>
-</font>
-<table border=""0"" cellpadding=""3"" style=""font-size:8pt;font-family:Segoe UI,Arial,sans-serif"">
-<tr bgcolor=""#009900"">
-<th colspan=""$($ExchangeEnvironment.TotalMailboxesByVersion.Count)""><font color=""#ffffff"">Total Servers:</font></th>"
+$Output= @"
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" />
+    </head>
+    <body>
+        <div class="container-fluid">
+        <div>
+            <h1 class="text-left text-primary">Exchange Environment Report</h1>
+            <h5 class="text-left text-primary">Generated $((Get-Date).ToString())</h5>
+        </div>
+        <div class="col-md-6">
+        <table class="btn-primary">
+            <thead class="btn-primary">
+                <tr>
+                    <th colspan="$($ExchangeEnvironment.TotalMailboxesByVersion.Count)">Total Servers:</th>
+"@
 if ($ExchangeEnvironment.RemoteMailboxes)
     {
-    $Output+="<th colspan=""$($ExchangeEnvironment.TotalMailboxesByVersion.Count+2)""><font color=""#ffffff"">Total Mailboxes:</font></th>"
+    $Output+= @"
+                    <th colspan="$($ExchangeEnvironment.TotalMailboxesByVersion.Count+2)>Total Mailboxes:</th>"
+"@
     } else {
-    $Output+="<th colspan=""$($ExchangeEnvironment.TotalMailboxesByVersion.Count+1)""><font color=""#ffffff"">Total Mailboxes:</font></th>"
+    $Output+= @"
+                    <th colspan="$($ExchangeEnvironment.TotalMailboxesByVersion.Count+1)>Total Mailboxes:</th>
+"@
     }
-$Output+="<th colspan=""$($ExchangeEnvironment.TotalServersByRole.Count)""><font color=""#ffffff"">Total Roles:</font></th></tr>
-<tr bgcolor=""#00CC00"">"
+$Output+= @"
+                    <th colspan="$($ExchangeEnvironment.TotalServersByRole.Count)">Total Roles:</th></tr>
+                <tr>
+"@
 # Show Column Headings based on the Exchange versions we have
-$ExchangeEnvironment.TotalMailboxesByVersion.GetEnumerator()|Sort Name| %{$Output+="<th>$($ExVersionStrings[$_.Key].Short)</th>"}
-$ExchangeEnvironment.TotalMailboxesByVersion.GetEnumerator()|Sort Name| %{$Output+="<th>$($ExVersionStrings[$_.Key].Short)</th>"}
+$ExchangeEnvironment.TotalMailboxesByVersion.GetEnumerator()|Sort Name| %{$Output+= @"
+                    <th>$($ExVersionStrings[$_.Key].Short)</th>
+"@
+}
+$ExchangeEnvironment.TotalMailboxesByVersion.GetEnumerator()|Sort Name| %{$Output+= @"
+                    <th>$($ExVersionStrings[$_.Key].Short)</th>"
+"@    
+}
 if ($ExchangeEnvironment.RemoteMailboxes)
 {
-    $Output+="<th>Office 365</th>"
+    $Output+= @"
+                    <th>Office 365</th>
+"@
 }
-$Output+="<th>Org</th>"
-$ExchangeEnvironment.TotalServersByRole.GetEnumerator()|Sort Name| %{$Output+="<th>$($ExRoleStrings[$_.Key].Short)</th>"}
-$Output+="<tr>"
-$Output+="<tr align=""center"" bgcolor=""#dddddd"">"
+$Output+= @"
+                    <th>Org</th>
+"@
+$ExchangeEnvironment.TotalServersByRole.GetEnumerator()|Sort Name| %{$Output+= @"
+                    <th>$($ExRoleStrings[$_.Key].Short)</th>
+"@
+}
+$Output+= @"
+            </thead>
+                <tr>
+            <tbody>
+"@
+$Output+= @"
+                <tr class="text-center">
+"@
 $ExchangeEnvironment.TotalMailboxesByVersion.GetEnumerator()|Sort Name| %{$Output+="<td>$($_.Value.ServerCount)</td>" }
 $ExchangeEnvironment.TotalMailboxesByVersion.GetEnumerator()|Sort Name| %{$Output+="<td>$($_.Value.MailboxCount)</td>" }
 if ($RemoteMailboxes)
@@ -1067,6 +1102,7 @@ if ($RemoteMailboxes)
 $Output+="<td>$($ExchangeEnvironment.TotalMailboxes)</td>"
 $ExchangeEnvironment.TotalServersByRole.GetEnumerator()|Sort Name| %{$Output+="<td>$($_.Value)</td>"}
 $Output+="</tr><tr><tr></table><br>"
+
 
 # Sites and Servers
 _UpProg1 20 "Writing HTML Site Information" 4
